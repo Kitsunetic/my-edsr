@@ -78,6 +78,8 @@ def main():
         result_image = transforms.ToPILImage()(result[0].cpu())
         result_image.save('./results/result/result_%d.png'%epoch)
         result_image.close()
-        
+      
+    # TODO: make validation, save result as full image(not a patch size result)
+    
 if __name__ == "__main__":
   main()

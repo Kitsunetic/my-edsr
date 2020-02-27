@@ -3,9 +3,11 @@ import argparse
 
 parser = argparse.ArgumentParser(description='my edsr tester for raw images')
 
-# normalization
+# raw image normalization
 parser.add_argument('--black_lv', type=int, default=512)
 parser.add_argument('--white_lv', type=int, default=16383)
+
+# image preprocessing
 parser.add_argument('--patch_size', type=int, default=512)
 
 # train
@@ -21,5 +23,5 @@ parser.add_argument('--dataset_path', type=str, default='../datasets/SRRAW196.v2
 parser.add_argument('--result_path', type=str, default='../result')
 
 # model
-parser.add_argument('--num_resblock', type=int, default=16)
-parser.add_argument('--num_channels', type=int, default=32)
+parser.add_argument('--num_resblock', type=int, default=16) # baseline mode size
+parser.add_argument('--num_channels', type=int, default=64) # baseline mode size
