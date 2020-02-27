@@ -53,8 +53,7 @@ class UpSampler(nn.Sequential):
 class EDSR(nn.Module):
   def __init__(self, num_resblock: int, 
                in_channels: int, out_channels: int, num_channels: int, 
-               color_mean: List[float], color_std: List[float],
-               res_scale: int, scale: int):
+               color_mean: List[float], color_std: List[float], res_scale: int, scale: int):
     super(EDSR, self).__init__()
     
     # mean shift
@@ -84,10 +83,10 @@ class EDSR(nn.Module):
     x = self.sub_mean(x)
     x = self.head_module(x)
     
-    res = self.body(x)
+    res = self.body_module(x)
     res += x
     
-    x = self.tail(res)
+    x = self.tail_module(res)
     x = self.add_mean(x)
     
     return x

@@ -30,11 +30,12 @@ def main():
   color_mean_path = os.path.join(args.dataset_path, 'color_mean.txt')
   with open(color_mean_path, 'r') as f:
     color_mean = list(map(float, f.read().split()))
-
+  color_std = [1., 1., 1., 1.]
+  
   # make model
   model = models.EDSR(args.num_resblock, 
                       args.in_channels, args.out_channels, args.num_channels, 
-                      color_mean, args.res_scale, args.scale).to(device)
+                      color_mean, color_std, args.res_scale, args.scale).to(device)
 
   optimizer = torch.optim.Adam(model.parameters())
   
@@ -47,7 +48,7 @@ def main():
   history = {'cost': []}
   for epoch in range(1, args.num_epochs+1):
     with tqdm(total=len(dataloader), desc='[%04d/%04d]'%(epoch, args.num_epochs),
-              unit='step', ncols=128, position=0, miniters=1) as t:
+              unit='step', ncols=96, position=0, miniters=1) as t:
       for step, (train, test) in enumerate(dataloader):
         # to device
         train = train.to(device)
