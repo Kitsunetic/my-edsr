@@ -2,6 +2,8 @@ import os
 import pickle
 import re
 
+import torch
+
 
 class RAW2RGB(torch.utils.data.Dataset):
   def __init__(self, dataset_path: str, black_lv=512, white_lv=16384):
