@@ -33,7 +33,7 @@ def main():
 
   # make model
   model = models.EDSR(args.num_resblock, 
-                      args.in_channel, args.out_channel, args.num_channels, 
+                      args.in_channels, args.out_channels, args.num_channels, 
                       color_mean, args.res_scale, args.scale).to(device)
 
   optimizer = torch.optim.Adam(model.parameters())
