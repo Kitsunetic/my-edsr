@@ -46,7 +46,7 @@ def main():
   model = models.EDSR(args.num_resblock, 
                       args.in_channels, args.out_channels, args.num_channels, 
                       color_mean, color_std, args.res_scale, args.scale)
-  model = nn.DataParallel(model).to(device)
+  model = nn.DataParallel(model).to(device, [0, 1, 2, 3])
 
   optimizer = torch.optim.Adam(model.parameters())
   
