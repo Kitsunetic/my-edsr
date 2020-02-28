@@ -82,7 +82,7 @@ def main():
         t.update()
     
     # validation
-    cost_list = []
+    """
     psnr_list = []
     with tqdm(total=len(valid_loader), desc='[%04d/%04d] valid'%(epoch, args.num_epochs),
               unit='batch', ncols=96, position=0, miniters=1) as t:
@@ -125,6 +125,15 @@ def main():
       mean_loss = sum(cost_list) / len(cost_list)
       mean_psnr = sum(psnr_list) / len(psnr_list)
       t.set_postfix_str('val-loss %.4f psnr %.4f'%(mean_loss, mean_psnr))
+      """
+    
+    # save test images
+    result_image = transforms.ToPILImage(result[0].cpu())
+    result_image.save(os.path.join(args.result_path, '%05d-result.png'%epoch))
+    result_image.close()
+    test_image = transforms.ToPILImage(test[0].cpu())
+    test_image.save(os.path.join(args.result_path, '%05d-test.png'%epoch))
+    test_image.close()
     
 if __name__ == "__main__":
   main()
