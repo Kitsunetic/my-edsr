@@ -2,9 +2,12 @@ import os
 import sys
 
 import imageio
+import matplotlib.pyplot as plt
 import numpy as np
 import torch
 import torch.nn as nn
+from torch.utils.data import DataLoader, random_split
+from torch.utils.data.sampler import SubsetRandomSampler
 from torchvision import transforms
 from tqdm import tqdm
 
@@ -21,12 +24,19 @@ def main():
 
   # make dataloader
   dataset = datasets.RAW2RGB(args.dataset_path)
-  dataloader = torch.utils.data.DataLoader(dataset, 
-                                           batch_size=args.batch_size, 
-                                           shuffle=args.shuffle, 
-                                           num_workers=args.num_workers)
+  
+  valid_dataset_size = int(args.valid_split * len(dataset))
+  train_dataset_size = len(dataset) - valid_dataset_size
+  
+  train_dataset, valid_dataset = random_split(dataset, 
+                                              (train_dataset_size, valid_dataset_size))
 
-  # load color-mean of dataset
+  train_loader = DataLoader(train_dataset_size, batch_size=args.batch_size,
+                            shuffle=args.shuffle, num_workers=args.num_workers)
+  valid_loader = DataLoader(dataset, batch_size=args.batch_size,
+                            shuffle=args.shuffle, num_workers=args.num_workers)
+
+  # load color-mean and color-std of dataset
   color_mean_path = os.path.join(args.dataset_path, 'color_mean.txt')
   with open(color_mean_path, 'r') as f:
     color_mean = list(map(float, f.read().split()))
@@ -45,11 +55,11 @@ def main():
   }
   loss = losses.Contextual_Loss(layers, max_1d_size=64).to(device)
   
-  history = {'cost': []}
   for epoch in range(1, args.num_epochs+1):
-    with tqdm(total=len(dataloader), desc='[%04d/%04d]'%(epoch, args.num_epochs),
-              unit='step', ncols=96, position=0, miniters=1) as t:
-      for step, (train, test) in enumerate(dataloader):
+    # train
+    with tqdm(total=len(train_loader), desc='[%04d/%04d] train'%(epoch, args.num_epochs),
+              unit='batch', ncols=96, position=0, miniters=1) as t:
+      for batch_idx, (train, test) in enumerate(train_loader):
         # to device
         train = train.to(device)
         test = test.to(device)
@@ -67,20 +77,52 @@ def main():
         
         # update tqdm
         cost_val = cost.item()
-        t.set_postfix_str('cost %.04f'%cost_val)
+        t.set_postfix_str('loss %.04f'%cost_val)
         t.update()
     
-      # save result
-      if epoch % 1 == 0:
-        test_image = transforms.ToPILImage()(test[0].cpu())
-        test_image.save('./results/result/test_%d.png'%epoch)
-        test_image.close()
+    # validation
+    cost_list = []
+    psnr_list = []
+    with tqdm(total=len(valid_loader), desc='[%04d/%04d] valid'%(epoch, args.num_epochs),
+              unit='batch', ncols=96, position=0, miniters=1) as t:
+      for batch_idx, (train, test) in enumerate(valid_loader):
+        torch.set_grad_enabled(False)
         
+        train = train.to(device)
+        test = test.to(device)
+        
+        result = model(train)
+        
+        # calculate loss
+        cost = loss(result, test)
+        cost_list.append(cost.item())
+        
+        # calculate psnr
+        psnr = (result - test) / 255.
+        psnr = -10 * psnr.pow(2).mean().log10()
+        psnr_list.append(psnr.item())
+        
+        # save results
+        test_image = transforms.ToPILImage()(test[0].cpu())
         result_image = transforms.ToPILImage()(result[0].cpu())
-        result_image.save('./results/result/result_%d.png'%epoch)
-        result_image.close()
+        
+        plt.figure(figsize=(16, 16))
+        plt.subplot(1, 2, 1)
+        plt.imshow(test_image)
+        plt.subplot(1, 2, 2)
+        plt.imshow(result_image)
+        figure_path = os.path.join(args.result_path, 'epoch%04d-%04d.png'%(epoch, batch_idx))
+        plt.savefig(figure_path, dpi=300)
+        
+        # update tqdm
+        t.set_postfix_str('val-loss %.4f psnr %.4f'%(cost.item(), psnr.item()))
+        t.update()
+        
+        torch.set_grad_enabled(True)
       
-    # TODO: make validation, save result as full image(not a patch size result)
+      mean_loss = sum(cost_list) / len(cost_list)
+      mean_psnr = sum(psnr_list) / len(psnr_list)
+      t.set_postfix_str('val-loss %.4f psnr %.4f'%(mean_loss, mean_psnr))
     
 if __name__ == "__main__":
   main()

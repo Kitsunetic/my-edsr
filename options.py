@@ -17,9 +17,10 @@ parser.add_argument('--num_epochs', type=int, default=50)
 parser.add_argument('--batch_size', type=int, default=1)
 parser.add_argument('--shuffle', action='store_true', default=1)
 parser.add_argument('--num_workers', type=int, default=4)
+parser.add_argument('--validation_split', type=float, default=0.2)
 
 # file system
-parser.add_argument('--dataset_path', type=str, default='../../datasets/SRRAW196.v2')
+parser.add_argument('--dataset_path', type=str, default='../datasets/SRRAW196.v2')
 parser.add_argument('--result_path', type=str, default='./results')
 
 # model
