@@ -24,9 +24,9 @@ def main():
 
   # make dataloader
   dataset = datasets.RAW2RGB(args.dataset_path)
-  
-  valid_dataset_size = int(args.validation_split * len(dataset))
-  train_dataset_size = len(dataset) - valid_dataset_size
+  dataset_size = len(dataset)
+  valid_dataset_size = int(args.validation_split * dataset_size)
+  train_dataset_size = dataset_size - valid_dataset_size
   
   train_dataset, valid_dataset = random_split(dataset, 
                                               [train_dataset_size, valid_dataset_size])
@@ -45,7 +45,8 @@ def main():
   # make model
   model = models.EDSR(args.num_resblock, 
                       args.in_channels, args.out_channels, args.num_channels, 
-                      color_mean, color_std, args.res_scale, args.scale).to(device)
+                      color_mean, color_std, args.res_scale, args.scale)
+  model = nn.DataParallel(model).to(device)
 
   optimizer = torch.optim.Adam(model.parameters())
   
@@ -106,13 +107,14 @@ def main():
         test_image = transforms.ToPILImage()(test[0].cpu())
         result_image = transforms.ToPILImage()(result[0].cpu())
         
-        plt.figure(figsize=(16, 16))
+        fig = plt.figure(figsize=(16, 16))
         plt.subplot(1, 2, 1)
         plt.imshow(test_image)
         plt.subplot(1, 2, 2)
         plt.imshow(result_image)
         figure_path = os.path.join(args.result_path, 'epoch%04d-%04d.png'%(epoch, batch_idx))
         plt.savefig(figure_path, dpi=300)
+        plt.close(fig)
         
         # update tqdm
         t.set_postfix_str('%04d-%04d'%(epoch, batch_idx))
