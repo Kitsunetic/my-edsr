@@ -37,12 +37,14 @@ def main():
       src_lr_paths = list(map(lambda f: os.path.join(src_dir_path, f), src_lr_files))
       src_hr_paths = list(map(lambda f: os.path.splitext(f)[0] + '.JPG', src_lr_paths))
       for lr, hr in zip(src_lr_paths, src_hr_paths):
+        src_paths.append((lr, hr))
+        """ # when dataset contains crashed images
         try:
           with rawpy.imread(lr):
             src_paths.append((lr, hr))
         except rawpy._rawpy.LibRawNonFatalError:
           failure_paths.append((lr, hr))
-      
+        """
       # update tqdm
       t.update()
   
@@ -74,7 +76,7 @@ def main():
       lr = lr[dh:dh+patch_size, dw:dw+patch_size]
       
       # make lr 4channel
-      lr_ = np.zeros((lr.shape[0]//2, lr.shape[1]//2, 4))
+      lr_ = np.zeros((lr.shape[0]//2, lr.shape[1]//2, 4), dtype=np.float32)
       lr_[:, :, 0] = lr[0::2, 0::2] # R
       lr_[:, :, 1] = lr[1::2, 0::2] # G1
       lr_[:, :, 2] = lr[1::2, 1::2] # B
