@@ -117,7 +117,7 @@ def main():
         plt.close(fig)
         
         # update tqdm
-        t.set_postfix_str('%04d-%04d'%(epoch, batch_idx))
+        t.set_postfix_str('val-loss %.4f psnr %.4f'%(cost.item(), psnr.item()))
         t.update()
         
         torch.set_grad_enabled(True)
