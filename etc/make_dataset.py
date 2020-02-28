@@ -12,12 +12,12 @@ from torchvision import transforms
 from tqdm import tqdm
 
 src_dataset_path = '/mnt/d/datasets/SRRAW-align.v3'
-dst_dataset_path = '/mnt/d/datasets/SRRAW512'
+dst_dataset_path = '/mnt/d/datasets/SRRAW48'
 
 black_lv = 512
 white_lv = 16384
 
-dataset_size = 512
+dataset_size = 48
 patch_size = 1024
 
 
