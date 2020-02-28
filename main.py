@@ -25,19 +25,19 @@ def main():
   # make dataloader
   dataset = datasets.RAW2RGB(args.dataset_path)
   
-  valid_dataset_size = int(args.valid_split * len(dataset))
+  valid_dataset_size = int(args.validation_split * len(dataset))
   train_dataset_size = len(dataset) - valid_dataset_size
   
   train_dataset, valid_dataset = random_split(dataset, 
-                                              (train_dataset_size, valid_dataset_size))
-
-  train_loader = DataLoader(train_dataset_size, batch_size=args.batch_size,
+                                              [train_dataset_size, valid_dataset_size])
+  
+  train_loader = DataLoader(dataset, batch_size=args.batch_size,
                             shuffle=args.shuffle, num_workers=args.num_workers)
   valid_loader = DataLoader(dataset, batch_size=args.batch_size,
                             shuffle=args.shuffle, num_workers=args.num_workers)
 
   # load color-mean and color-std of dataset
-  color_mean_path = os.path.join(args.dataset_path, 'color_mean.txt')
+  color_mean_path = os.path.join(args.dataset_path, 'color-mean.txt')
   with open(color_mean_path, 'r') as f:
     color_mean = list(map(float, f.read().split()))
   color_std = [1., 1., 1., 1.]
@@ -115,7 +115,7 @@ def main():
         plt.savefig(figure_path, dpi=300)
         
         # update tqdm
-        t.set_postfix_str('val-loss %.4f psnr %.4f'%(cost.item(), psnr.item()))
+        t.set_postfix_str('%04d-%04d'%(epoch, batch_idx))
         t.update()
         
         torch.set_grad_enabled(True)

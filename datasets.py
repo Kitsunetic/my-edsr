@@ -3,6 +3,7 @@ import pickle
 import re
 
 import torch
+from torchvision import transforms
 
 
 class RAW2RGB(torch.utils.data.Dataset):
@@ -14,15 +15,17 @@ class RAW2RGB(torch.utils.data.Dataset):
     for file in os.listdir(dataset_path):
       if re.match('\\d{5}\\.pkl', file):
         self.file_list.append(os.path.join(dataset_path, file))
+    
+    self.transform = transforms.ToTensor()
 
   def __getitem__(self, idx: int):
     with open(self.file_list[idx], 'rb') as f:
       data = pickle.load(f)
     
-    raw = data['input']
-    target = data['target']
+    lr = self.transform(data['lr'])
+    hr = self.transform(data['hr'])
     
-    return raw, target
+    return lr, hr
 
   def __len__(self):
     return len(self.file_list)
