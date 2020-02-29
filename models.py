@@ -57,7 +57,7 @@ class EDSR(nn.Module):
     super(EDSR, self).__init__()
     
     # mean shift
-    self.sub_mean = MeanShift(in_channels, color_mean, color_std, sign=-1) # input 4channels
+    #self.sub_mean = MeanShift(in_channels, color_mean, color_std, sign=-1) # input 4channels
     self.head_module = nn.Sequential(
       nn.Conv2d(in_channels, num_channels, 3, padding=1)
     )
@@ -68,19 +68,19 @@ class EDSR(nn.Module):
       UpSampler(scale, num_channels),
       nn.Conv2d(num_channels, out_channels, 3, padding=1)
     )
-    self.add_mean = MeanShift(out_channels, 
-                              [color_mean[0], (color_mean[1]+color_mean[3])/2, color_mean[2]], 
-                              [color_std[0],  (color_std[1]+color_std[3])/2,   color_std[2] ], 
-                              sign=1) # output 3channels
+    #self.add_mean = MeanShift(out_channels, 
+    #                          [color_mean[0], (color_mean[1]+color_mean[3])/2, color_mean[2]], 
+    #                          [color_std[0],  (color_std[1]+color_std[3])/2,   color_std[2] ], 
+    #                          sign=1) # output 3channels
 
   def forward(self, x):
-    x = self.sub_mean(x)
+    #x = self.sub_mean(x)
     x = self.head_module(x)
     
     res = self.body_module(x)
     res += x
     
     x = self.tail_module(res)
-    x = self.add_mean(x)
+    #x = self.add_mean(x)
     
     return x

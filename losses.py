@@ -64,7 +64,8 @@ crop_quarter: boolean
 
 """
 class Contextual_Loss(nn.Module):
-  def __init__(self, layers_weights, crop_quarter=False, max_1d_size=100, distance_type=Distance_Type.Cosine_Distance, b=1.0, h=0.1, cuda=True):
+  def __init__(self, layers_weights, crop_quarter=False, max_1d_size=100, 
+               distance_type=Distance_Type.Cosine_Distance, b=1.0, h=0.1, cuda=True):
     super(Contextual_Loss, self).__init__()
     listen_list = []
     self.layers_weights = {}
@@ -186,6 +187,7 @@ class Contextual_Loss(nn.Module):
     #
     square_I = torch.sum(Ivecs*Ivecs, dim=1, keepdim=False)
     square_T = torch.sum(Tvecs*Tvecs, dim=1, keepdim=False)
+    
     # raw_distance
     raw_distance = []
     for i in range(N):
@@ -295,6 +297,7 @@ class Contextual_Loss(nn.Module):
       print(exp_distance)
       raise ValueError('NaN or Inf in exp_distance')
     del relative_distance
+    
     # Similarity
     contextual_sim = exp_distance / torch.sum(exp_distance, dim=-1, keepdim=True)
     if torch.sum(torch.isnan(contextual_sim)) == torch.numel(contextual_sim) or torch.sum(
