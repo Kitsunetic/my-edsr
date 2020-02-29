@@ -46,7 +46,7 @@ def main():
   model = models.EDSR(args.num_resblock, 
                       args.in_channels, args.out_channels, args.num_channels, 
                       color_mean, color_std, args.res_scale, args.scale)
-  model = nn.DataParallel(model).to(device, [0, 1, 2, 3])
+  model = nn.DataParallel(model, [0, 1, 2, 3]).to(device)
 
   optimizer = torch.optim.Adam(model.parameters())
   
@@ -128,10 +128,13 @@ def main():
       """
     
     # save test images
-    result_image = transforms.ToPILImage(result[0].cpu())
+    result_image = transforms.ToPILImage()(result[0].cpu())
     result_image.save(os.path.join(args.result_path, '%05d-result.png'%epoch))
     result_image.close()
-    test_image = transforms.ToPILImage(test[0].cpu())
+    train_image = transforms.ToPILImage()(train[0].cpu())
+    train_image.save(os.path.join(args.result_path, '%05d-train.png'%epoch))
+    train_image.close()
+    test_image = transforms.ToPILImage()(test[0].cpu())
     test_image.save(os.path.join(args.result_path, '%05d-test.png'%epoch))
     test_image.close()
     

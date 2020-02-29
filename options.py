@@ -20,7 +20,7 @@ parser.add_argument('--num_workers', type=int, default=4)
 parser.add_argument('--validation_split', type=float, default=0.05)
 
 # file system
-parser.add_argument('--dataset_path', type=str, default='../../datasets/SRRAW512')
+parser.add_argument('--dataset_path', type=str, default='../../datasets/SRRAW48')
 parser.add_argument('--result_path', type=str, default='./results')
 
 # model
